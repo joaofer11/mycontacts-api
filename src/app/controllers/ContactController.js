@@ -24,8 +24,26 @@ class ContactController {
     res.status(200).json(contact)
   }
 
-  store() {
+  async store(req, res) {
     // Create a new record
+    
+    const { name, email, phone } = req.body
+    
+    if (!name) {
+      res.status(400).json({ error: "Name is required" })
+      return
+    }
+    
+    const isContactAlreadyExists = await ContactRepository.findByEmail(email)
+    
+    if (isContactAlreadyExists) {
+      res.status(400).json({ error: "This contact already exists" })
+      return
+    }
+    
+    const contact = await ContactRepository.create({ name, email, phone })
+    
+    res.status(201).json(contact)
   }
 
   update() {
