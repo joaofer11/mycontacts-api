@@ -32,8 +32,22 @@ class ContactController {
     // Edit a existing record
   }
 
-  delete() {
+  async delete(req, res) {
     // Delete a existing record
+    
+    const { id } = req.params
+    
+    const contact = await ContactRepository.findById(id)
+    
+    console.log(contact)
+    
+    if (!contact) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+    
+    ContactRepository.delete(id)
+    res.sendStatus(202)
   }
 }
 
