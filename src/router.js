@@ -1,4 +1,5 @@
 const { Router } = require('express')
+const { ContactController } = require('./app/controllers/ContactController')
 
 const router = Router()
 
@@ -9,8 +10,6 @@ const router = Router()
  *  delete /contacts/:id
 */
 
-router.get('/contacts', (req, res) => {
-  res.send('Contacts')
-})
+router.get('/contacts', ContactController.index)
 
 exports.router = router
