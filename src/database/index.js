@@ -4,12 +4,13 @@ const client = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '825572j',
-  database: 'mycontacts'
+  database: 'mycontacts',
+  multipleStatements: true,
 })
 
-const reachDb = async (query) => {
-  const [rows] = await client.query(query)
-  console.log(rows)
+const query = async (statement, values) => {
+  const [rows] = await client.query(statement, values)
+  return { rows }
 }
 
-reachDb('SELECT * FROM contacts;')
+module.exports = { query }
