@@ -27,7 +27,7 @@ class ContactController {
   async store(req, res) {
     // Create a new record
     
-    const { name, email, phone } = req.body
+    const { name, email, phone, category_id } = req.body
     
     if (!name) {
       res.status(400).json({ error: "Name is required" })
@@ -41,7 +41,9 @@ class ContactController {
       return
     }
     
-    const contact = await ContactRepository.create({ name, email, phone })
+    const contact = await ContactRepository.create({ 
+      name, email, phone, category_id
+    })
     
     res.status(201).json(contact)
   }
