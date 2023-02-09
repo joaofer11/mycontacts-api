@@ -13,22 +13,37 @@ let contacts = [
 ]
 
 class ContactRepository {
-  findAll() {
-    return new Promise(resolve => {
-      resolve(contacts)
-    })
+  async findAll() {
+    const { rows } = await db.query(`
+      SELECT *, BIN_TO_UUID(id) AS id
+      FROM contacts
+    `)
+    
+    return rows
   }
   
-  findById(id) {
-    return new Promise(resolve => {
-      resolve(contacts.find(contact => contact.id === id))
-    })
+  async findById(id) {
+    const { rows } = await db.query(`
+      SELECT *, BIN_TO_UUID(id) AS id 
+      FROM contacts
+      WHERE id = UUID_TO_BIN(?)
+    `,
+      [id]
+    )
+    
+    return rows[0]
   }
   
-  findByEmail(email) {
-    return new Promise(resolve => {
-      resolve(contacts.find(contact => contact.email === email))
-    })
+  async findByEmail(email) {
+    const { rows } = await db.query(`
+      SELECT *, BIN_TO_UUID(id) AS id
+      FROM contacts
+      WHERE email = ?
+    `,
+      [email]
+    )
+    
+    return rows[0]
   }
   
   async create({ name, email, phone, category_id }) {
