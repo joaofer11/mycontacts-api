@@ -1,3 +1,5 @@
+const db = require('../../database')
+
 const { v4 } = require('uuid')
 
 let contacts = [
@@ -29,13 +31,22 @@ class ContactRepository {
     })
   }
   
-  create({ name, email, phone }) {
-    const newContact = { id: v4(), name, email, phone, category_id: v4() }
-    contacts.push(newContact)
+  async create({ name, email, phone, category_id }) {
+    const { rows } = await db.query(`
+      INSERT INTO contacts (name, email, phone, category_id) 
+      VALUES (?, ?, ?, ?);
+      SELECT BIN_TO_UUID(id) AS id FROM contacts ORDER BY id DESC LIMIT 1
+    `,
+      [name, email, phone, category_id ?? null]
+    )
     
-    return new Promise(resolve => {
-      resolve(newContact)
-    })
+    return {
+      id: rows[1][0].id,
+      name,
+      email,
+      phone,
+      category_id,
+    }
   }
   
   delete(id) {
