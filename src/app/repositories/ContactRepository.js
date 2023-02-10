@@ -5,8 +5,12 @@ class ContactRepository {
     const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'
     
     const rows = await db.query(`
-      SELECT *, BIN_TO_UUID(id) AS id
-      FROM contacts ORDER BY name ${direction}
+      SELECT contacts.*, BIN_TO_UUID(contacts.id) AS id,
+      BIN_TO_UUID(contacts.category_id) AS category_id,
+      categories.name AS category_name
+      FROM contacts
+      LEFT JOIN categories ON categories.id = contacts.category_id
+      ORDER BY contacts.name ${direction}
     `)
     
     return rows
@@ -14,9 +18,12 @@ class ContactRepository {
   
   async findById(id) {
     const [row] = await db.query(`
-      SELECT *, BIN_TO_UUID(id) AS id 
+      SELECT contacts.*, BIN_TO_UUID(contacts.id) AS id,
+      BIN_TO_UUID(contacts.category_id) AS category_id,
+      categories.name AS category_name
       FROM contacts
-      WHERE id = UUID_TO_BIN(?)
+      LEFT JOIN categories ON categories.id = contacts.category_id
+      WHERE contacts.id = UUID_TO_BIN(?)
     `,
       [id]
     )
@@ -26,11 +33,14 @@ class ContactRepository {
   
   async findByEmail(email) {
     const [row] = await db.query(`
-      SELECT *, BIN_TO_UUID(id) AS id
+      SELECT contacts.*, BIN_TO_UUID(contacts.id) AS id,
+      BIN_TO_UUID(contacts.category_id) AS category_id,
+      categories.name AS category_name
       FROM contacts
-      WHERE email = ?
+      LEFT JOIN categories ON categories.id = contacts.category_id
+      WHERE contacts.email = ?
     `,
-      [email]
+      [email ?? 'DEFAULT']
     )
     
     return row
@@ -44,25 +54,13 @@ class ContactRepository {
       [name, email, phone, category_id ?? null]
     )
     
-    const [row] = await db.query(`
-      SELECT BIN_TO_UUID(id) AS id
-      FROM contacts ORDER BY id DESC
-      LIMIT 1
-    `)
-    
-    return {
-      id: row.id,
-      name,
-      email,
-      phone,
-      category_id,
-    }
+    return await this.findByEmail(email)
   }
   
   async update(id, data) {
     const { name, email, phone, category_id } = data
     
-    db.query(`
+    await db.query(`
       UPDATE contacts SET
       name = ?,
       email = ?,
@@ -70,16 +68,10 @@ class ContactRepository {
       category_id = ?
       WHERE id = UUID_TO_BIN(?)
     `,
-      [name, email, phone, category_id, id]
+      [name, email ?? null, phone ?? null, category_id ?? null, id]
     )
     
-    return {
-      id,
-      name,
-      email,
-      phone,
-      category_id
-    }
+    return await this.findById(id)
   }
   
   delete(id) {
