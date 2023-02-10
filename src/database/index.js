@@ -9,7 +9,7 @@ const client = mysql.createPool({
 })
 
 const query = async (statement, values) => {
-  const [rows] = await client.query(statement, values)
+  const [rows] = await client.execute(statement, values)
   return rows
 }
 

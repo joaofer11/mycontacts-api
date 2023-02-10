@@ -37,16 +37,21 @@ class ContactRepository {
   }
   
   async create({ name, email, phone, category_id }) {
-    const [, rows] = await db.query(`
+    await db.query(`
       INSERT INTO contacts (name, email, phone, category_id) 
-      VALUES (?, ?, ?, ?);
-      SELECT BIN_TO_UUID(id) AS id FROM contacts ORDER BY id DESC LIMIT 1
+      VALUES (?, ?, ?, ?)
     `,
       [name, email, phone, category_id ?? null]
     )
     
+    const [row] = await db.query(`
+      SELECT BIN_TO_UUID(id) AS id
+      FROM contacts ORDER BY id DESC
+      LIMIT 1
+    `)
+    
     return {
-      id: rows[0].id,
+      id: row.id,
       name,
       email,
       phone,
