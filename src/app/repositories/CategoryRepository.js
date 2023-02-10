@@ -1,6 +1,16 @@
 const db = require('../../database')
 
 class CategoryRepository {
+  
+  async findAll() {
+    const rows = await db.query(`
+      SELECT *, BIN_TO_UUID(id) AS id 
+      FROM categories
+    `)
+    
+    return rows
+  }
+  
   async create(name) {
     await db.query(`
       INSERT INTO categories (name)
