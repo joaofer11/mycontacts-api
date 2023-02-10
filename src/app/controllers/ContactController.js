@@ -50,8 +50,36 @@ class ContactController {
     res.status(201).json(contact)
   }
 
-  update() {
+  async update(req, res) {
     // Edit a existing record
+    
+    const { id } = req.params
+    const { name, email, phone, category_id } = req.body
+    
+    const contact = ContactRepository.findById(id)
+    
+    if (!contact) {
+      res.status(404).json({ error: 'Contact not found' })
+      return
+    }
+    
+    if (!name) {
+      res.status(404).json({ error: 'Name is required' })
+      return
+    }
+    
+    const contactByEmail = await ContactRepository.findByEmail(email)
+    
+    if (contactByEmail && contactByEmail.id !== id) {
+      res.status(400).json({ error: 'This Email is already in use' })
+      return
+    }
+    
+    const updatedContact = await ContactRepository.update(id, {
+      name, email, phone, category_id
+    })
+    
+    res.status(200).json(updatedContact)
   }
 
   async delete(req, res) {

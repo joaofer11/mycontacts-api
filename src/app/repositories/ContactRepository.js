@@ -66,6 +66,29 @@ class ContactRepository {
     }
   }
   
+  async update(id, data) {
+    const { name, email, phone, category_id } = data
+    
+    const { rows } = db.query(`
+      UPDATE contacts SET
+      name = ?,
+      email = ?,
+      phone = ?,
+      category_id = ?
+      WHERE id = ?;
+    `,
+      [name, email, phone, category_id, id]
+    )
+    
+    return {
+      id,
+      name,
+      email,
+      phone,
+      category_id
+    }
+  }
+  
   delete(id) {
     contacts = contacts.filter(contact => contact.id !== id)
   }
