@@ -90,7 +90,7 @@ class ContactRepository {
   }
   
   delete(id) {
-    contacts = contacts.filter(contact => contact.id !== id)
+    db.query('DELETE FROM contacts WHERE id = UUID_TO_BIN(?)', [id])
   }
 }
 
