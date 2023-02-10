@@ -56,7 +56,7 @@ class ContactController {
     const { id } = req.params
     const { name, email, phone, category_id } = req.body
     
-    const contact = ContactRepository.findById(id)
+    const contact = await ContactRepository.findById(id)
     
     if (!contact) {
       res.status(404).json({ error: 'Contact not found' })
