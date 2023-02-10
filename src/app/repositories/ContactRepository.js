@@ -13,10 +13,12 @@ let contacts = [
 ]
 
 class ContactRepository {
-  async findAll() {
+  async findAll(orderBy = 'ASC') {
+    const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'
+    
     const { rows } = await db.query(`
       SELECT *, BIN_TO_UUID(id) AS id
-      FROM contacts
+      FROM contacts ORDER BY name ${direction}
     `)
     
     return rows
