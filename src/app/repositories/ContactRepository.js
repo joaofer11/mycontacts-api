@@ -1,22 +1,10 @@
 const db = require('../../database')
 
-const { v4 } = require('uuid')
-
-let contacts = [
-  {
-    id: v4(),
-    name: 'João',
-    email: 'joaofer@gmail.com',
-    phone: '838288228',
-    category_id: v4()
-  }
-]
-
 class ContactRepository {
   async findAll(orderBy = 'ASC') {
     const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'
     
-    const { rows } = await db.query(`
+    const rows = await db.query(`
       SELECT *, BIN_TO_UUID(id) AS id
       FROM contacts ORDER BY name ${direction}
     `)
@@ -25,7 +13,7 @@ class ContactRepository {
   }
   
   async findById(id) {
-    const { rows } = await db.query(`
+    const [row] = await db.query(`
       SELECT *, BIN_TO_UUID(id) AS id 
       FROM contacts
       WHERE id = UUID_TO_BIN(?)
@@ -33,11 +21,11 @@ class ContactRepository {
       [id]
     )
     
-    return rows[0]
+    return row
   }
   
   async findByEmail(email) {
-    const { rows } = await db.query(`
+    const [row] = await db.query(`
       SELECT *, BIN_TO_UUID(id) AS id
       FROM contacts
       WHERE email = ?
@@ -45,11 +33,11 @@ class ContactRepository {
       [email]
     )
     
-    return rows[0]
+    return row
   }
   
   async create({ name, email, phone, category_id }) {
-    const { rows } = await db.query(`
+    const [, rows] = await db.query(`
       INSERT INTO contacts (name, email, phone, category_id) 
       VALUES (?, ?, ?, ?);
       SELECT BIN_TO_UUID(id) AS id FROM contacts ORDER BY id DESC LIMIT 1
@@ -58,7 +46,7 @@ class ContactRepository {
     )
     
     return {
-      id: rows[1][0].id,
+      id: rows[0].id,
       name,
       email,
       phone,
@@ -69,13 +57,13 @@ class ContactRepository {
   async update(id, data) {
     const { name, email, phone, category_id } = data
     
-    const { rows } = db.query(`
+    db.query(`
       UPDATE contacts SET
       name = ?,
       email = ?,
       phone = ?,
       category_id = ?
-      WHERE id = ?;
+      WHERE id = UUID_TO_BIN(?)
     `,
       [name, email, phone, category_id, id]
     )

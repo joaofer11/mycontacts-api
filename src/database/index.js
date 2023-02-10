@@ -10,7 +10,7 @@ const client = mysql.createPool({
 
 const query = async (statement, values) => {
   const [rows] = await client.query(statement, values)
-  return { rows }
+  return rows
 }
 
 module.exports = { query }
